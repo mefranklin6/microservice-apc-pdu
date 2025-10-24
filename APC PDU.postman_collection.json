@@ -1,0 +1,45 @@
+{
+	"info": {
+		"_postman_id": "3012367b-2d35-44db-bd45-e5bd7c7cd7e1",
+		"name": "APC PDU",
+		"description": "A collection of all possible GET and PUT calls for the APC PDU microservice.",
+		"_exporter_id": "40395877",
+		"_collection_link": "https://csu-chico-cts.postman.co/workspace/test~40ceb988-bd6b-411b-bd00-5549afb0d7de/collection/40395877-3012367b-2d35-44db-bd45-e5bd7c7cd7e1?action=share&source=collection_link&creator=40395877"
+	},
+	"item": [
+		{
+			"name": "State",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://{{microserviceURL}}/{{protocol}}|{{username}}:{{password}}@{{deviceIP}}:{{devicePort}}/state/{{outletNumber}}",
+				"description": "Gets the state of a single outlet. The outlet number is accepted in the path. Returns \"on\", \"off\", or \"unknown\"."
+			},
+			"response": []
+		},
+		{
+			"name": "State",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\"on\""
+				},
+				"url": "http://{{microserviceURL}}/{{protocol}}|{{username}}:{{password}}@{{deviceIP}}:{{devicePort}}/state/{{outletNumber}}",
+				"description": "Sets the state of a single or range of outlets on the APC PDU. The outlet number is accepted in the path. The state is accepted in the body as \"on\", \"off\", or \"reboot\".\n\nExample outlet numbers: 3, 1-6, etc."
+			},
+			"response": []
+		},
+		{
+			"name": "All Outlets",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://{{microserviceURL}}/{{protocol}}|{{username}}:{{password}}@{{deviceIP}}:{{devicePort}}/alloutlets",
+				"description": "Gets the status of all outlets. Returns all outlet numbers, names and states delimited by pipe | per outlet."
+			},
+			"response": []
+		}
+	]
+}
