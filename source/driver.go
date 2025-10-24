@@ -63,7 +63,6 @@ func setState(socketKey string, num string, state string) (string, error) {
 	state = strings.ReplaceAll(state, "'", "")
 	framework.Log(function + " Setting outlet(s): " + num + " to: " + state)
 	cmd := "ol" + state + " " + num + "\r\n"
-	framework.Log("-----------------------+++++++++++++++++Command to send: " + cmd)
 
 	resp, err := sendCommand(socketKey, cmd)
 	if err != nil {
@@ -113,7 +112,6 @@ func telnetLoginNegotiation(socketKey string) bool {
 		// Clean up the text for matching
 		plain := strings.TrimSpace(raw)
 		lower := strings.ToLower(plain)
-
 		// framework.Log(fmt.Sprintf("Round %d - Received: %q", round, plain))
 
 		// Skip echo of username or password we sent
@@ -176,7 +174,7 @@ func sendCommand(socketKey string, command string) (string, error) {
 		err := errors.New(errMsg)
 		return "", err
 	}
-	framework.Log("Sending command to device: " + command)
+	// framework.Log("Sending command to device: " + command)
 	framework.WriteLineToSocket(socketKey, command)
 
 	resultCache := []string{}
@@ -201,6 +199,9 @@ func sendCommand(socketKey string, command string) (string, error) {
 		case strings.Contains(line+"\r\n", command): // command echo
 			seenPrompt = true
 			continue
+		case strings.Contains(line, "Connection Closed - Bye"): // connection closed by device
+			framework.CloseSocketConnection(socketKey)
+			return "", errors.New("Connection closed by device")
 		case strings.Contains(line, "E000"): // Success code.  Should be the last line.
 			switch len(resultCache) {
 			case 0:
