@@ -10,6 +10,7 @@ func setFrameworkGlobals() {
 	framework.MicroserviceName = "OpenAV APC PDU Microservice"
 	framework.DefaultSocketPort = 23
 	framework.KeepAlive = true
+
 	framework.CheckFunctionAppendBehavior = "Remove older instance"
 	framework.RegisterMainGetFunc(doDeviceSpecificGet)
 	framework.RegisterMainSetFunc(doDeviceSpecificSet)
@@ -29,7 +30,7 @@ func doDeviceSpecificSet(socketKey string, setting string, arg1 string, arg2 str
 
 	// Add a case statement for each set function your microservice implements.  These calls can use 0, 1, or 2 arguments.
 	switch setting {
-	case "setstate":
+	case "state":
 		return setState(socketKey, arg1, arg2) // arg1 = outlet number, outlet range ex:("1-6") or "all". arg2 = state
 	}
 
@@ -53,7 +54,7 @@ func doDeviceSpecificGet(socketKey string, setting string, arg1 string, arg2 str
 	function := "doDeviceSpecificGet"
 
 	switch setting {
-	case "setstate":
+	case "state":
 		return getState(socketKey, arg1) // arg1 = outlet number
 	case "alloutlets": // not an official endpoint
 		return getAllOutlets(socketKey)

@@ -59,8 +59,11 @@ func getAllOutlets(socketKey string) (string, error) {
 func setState(socketKey string, num string, state string) (string, error) {
 	function := "setState"
 
+	state = strings.ReplaceAll(state, "\"", "")
+	state = strings.ReplaceAll(state, "'", "")
 	framework.Log(function + " Setting outlet(s): " + num + " to: " + state)
 	cmd := "ol" + state + " " + num + "\r\n"
+	framework.Log("-----------------------+++++++++++++++++Command to send: " + cmd)
 
 	resp, err := sendCommand(socketKey, cmd)
 	if err != nil {
