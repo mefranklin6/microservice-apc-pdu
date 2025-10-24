@@ -49,3 +49,7 @@ Returns "ok".  Check logs for errors.
 ### Get all outlets
 
 Returns all outlets delimited by pipes `|`
+
+## Note to maintainers
+
+This microservice requires built-in echo handling, at least for telnet.  At the time of development, the devices tested did not seem to care that we sent "DON'T ECHO" at the IAC stage; Even though they reply "WON'T ECHO", they still send echo.  It was deemed more reliable to just ignore all IAC and process reads with IAC default values.
