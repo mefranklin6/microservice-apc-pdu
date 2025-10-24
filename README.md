@@ -29,3 +29,23 @@ By default, this microservice presumes the protocol is defined in the URL.  This
 ex: `http://<microserviceAddr>/telnet|<user>:<pw>@<deviceAddr>:<devicePort>`
 
 To enable 'legacy' telnet-only mode: add `framework.UseTelnet = true` to to 'setFrameworkGlobals' in microservice.go.
+
+## Endpoints
+
+### Get state
+
+GET `/state/<outletNum>`
+
+Returns "on", "off", or "unknown".  See container logs for any errors.
+
+### Set state
+
+PUT `/state/<outletNum>` with "on" or "off" or "reboot" in the body of the request.
+
+`outletNum` can be a single outlet number ex:"1", a range of outlets (ex: "1-6"), or "all".
+
+Returns "ok".  Check logs for errors.
+
+### Get all outlets
+
+Returns all outlets delimited by pipes `|`
