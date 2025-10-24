@@ -10,6 +10,7 @@ func setFrameworkGlobals() {
 	framework.MicroserviceName = "OpenAV APC PDU Microservice"
 	framework.DefaultSocketPort = 23
 	framework.KeepAlive = true
+	framework.DisconnectAfterDoneRefreshing = true // or else device will close on timeout
 
 	framework.CheckFunctionAppendBehavior = "Remove older instance"
 	framework.RegisterMainGetFunc(doDeviceSpecificGet)

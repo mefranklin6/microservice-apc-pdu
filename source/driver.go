@@ -149,6 +149,13 @@ func telnetLoginNegotiation(socketKey string) bool {
 func ensureConnected(socketKey string) bool {
 	function := "ensureConnected"
 
+	// SSH work in progress: password-based auth needed in framework first.
+	protocol := framework.GetDeviceProtocol(socketKey)
+	if protocol != "telnet" {
+		framework.Log(function + " - Unsupported protocol: " + protocol)
+		return false
+	}
+
 	connected := framework.CheckConnectionsMapExists(socketKey)
 	if !connected {
 		framework.Log(function + " - No existing connection found. Creating new connection.")
@@ -176,7 +183,8 @@ func sendCommand(socketKey string, command string) (string, error) {
 	seenPrompt := false
 
 	// Make a read loop. APC's are really chatty and can have multi-line responses
-	const maxReads = 20
+	// alloutlets returns one line per outlet, so we need a lot of reads for larger PDU's.
+	const maxReads = 40
 	for i := 0; i < maxReads; i++ {
 		// Remove any null bytes, carriage returns, or line feeds (there's a lot)
 		line := framework.ReadLineFromSocket(socketKey)
