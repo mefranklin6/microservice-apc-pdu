@@ -8,6 +8,10 @@ import (
 	"github.com/mefranklin6/microservice-framework/framework"
 )
 
+// Microservice for managing APC Switched Power Distribution Units (PDUs).
+
+// Originally written by Matthew Franklin github.com/mefranklin6 at Chico State.
+
 ///////////////////////////////////////////////////////////////////////////////
 // Main Functions //
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,6 +83,7 @@ func setState(socketKey string, num string, state string) (string, error) {
 
 func telnetLoginNegotiation(socketKey string) bool {
 	function := "telnetLoginNegotiation"
+
 	framework.Log("Starting Telnet login negotiation for: " + socketKey)
 
 	username := "apc" // default if not specified
@@ -114,8 +119,6 @@ func telnetLoginNegotiation(socketKey string) bool {
 		lower := strings.ToLower(plain)
 		// framework.Log(fmt.Sprintf("Round %d - Received: %q", round, plain))
 
-		// Skip echo of username or password we sent
-
 		// Check for username prompt
 		if strings.Contains(lower, "user name") && !userSent {
 			framework.Log("Sending username: " + username)
@@ -147,7 +150,7 @@ func telnetLoginNegotiation(socketKey string) bool {
 func ensureConnected(socketKey string) bool {
 	function := "ensureConnected"
 
-	// SSH work in progress: password-based auth needed in framework first.
+	// TODO: SSH. Password-based SSH auth is needed in framework first.
 	protocol := framework.GetDeviceProtocol(socketKey)
 	if protocol != "telnet" {
 		framework.Log(function + " - Unsupported protocol: " + protocol)
@@ -168,6 +171,7 @@ func ensureConnected(socketKey string) bool {
 
 func sendCommand(socketKey string, command string) (string, error) {
 	function := "sendCommand"
+
 	if !ensureConnected(socketKey) {
 		errMsg := function + " - Unable to connect to device: " + socketKey
 		framework.AddToErrors(socketKey, errMsg)
@@ -178,9 +182,9 @@ func sendCommand(socketKey string, command string) (string, error) {
 	framework.WriteLineToSocket(socketKey, command)
 
 	resultCache := []string{}
-	seenPrompt := false
+	seenEcho := false
 
-	// Make a read loop. APC's are really chatty and can have multi-line responses
+	// Make a read loop. APC's are really chatty and can have long multi-line responses
 	// alloutlets returns one line per outlet, so we need a lot of reads for larger PDU's.
 	const maxReads = 40
 	for i := 0; i < maxReads; i++ {
@@ -197,7 +201,7 @@ func sendCommand(socketKey string, command string) (string, error) {
 		case line == "":
 			continue
 		case strings.Contains(line+"\r\n", command): // command echo
-			seenPrompt = true
+			seenEcho = true
 			continue
 		case strings.Contains(line, "Connection Closed - Bye"): // connection closed by device
 			framework.CloseSocketConnection(socketKey)
@@ -214,7 +218,7 @@ func sendCommand(socketKey string, command string) (string, error) {
 		case strings.Contains(line, "E"): // device error code
 			return "", errors.New("Device returned error code: " + line)
 		default:
-			if !seenPrompt { // ignore chatter before the echo
+			if !seenEcho { // ignore chatter before the echo
 				continue
 			}
 			resultCache = append(resultCache, line)
