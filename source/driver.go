@@ -84,10 +84,10 @@ func setState(socketKey string, num string, state string) (string, error) {
 func rebootOutlet(socketKey string, num string, sleep string) (string, error) {
 	function := "rebootOutlet"
 
-	framework.Log(function + " Rebooting outlet(s): " + num + " for (seconds): " + sleep)
-
 	sleep = strings.TrimSpace(sleep)
 	sleep = strings.Trim(sleep, `"'`)
+
+	framework.Log(function + " Rebooting outlet(s): " + num + " for (seconds): " + sleep)
 
 	intSleep, err := strconv.Atoi(sleep)
 	if err != nil {
