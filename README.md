@@ -30,6 +30,8 @@ ex: `http://<microserviceAddr>/telnet|<user>:<pw>@<deviceAddr>:<devicePort>`
 
 To enable 'legacy' Telnet-only or SSH-only mode: add `framework.UseTelnet = true` or ``framework.UseSSH = true`` to to 'setFrameworkGlobals' in microservice.go.
 
+*Note: This microservice only supports Telnet for now*
+
 ## Endpoints
 
 ### Get state
@@ -48,7 +50,7 @@ Returns "ok".  Check logs for errors.
 
 ### Get all outlets
 
-GET `/state/alloutlets`
+GET `/alloutlets`
 
 Returns all outlets delimited by pipes `|`
 
