@@ -215,7 +215,7 @@ func sendCommand(socketKey string, command string) (string, error) {
 			default:
 				return strings.Join(resultCache, "|"), nil
 			}
-		case strings.Contains(line, "E"): // device error code
+		case strings.HasPrefix(line, "E"): // device error code
 			return "", errors.New("Device returned error code: " + line)
 		default:
 			if !seenEcho { // ignore chatter before the echo
