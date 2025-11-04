@@ -12,7 +12,6 @@ func setFrameworkGlobals() {
 	framework.KeepAlive = true
 	framework.DisconnectAfterDoneRefreshing = true // or else device will close on timeout
 
-	framework.CheckFunctionAppendBehavior = "Remove older instance"
 	framework.RegisterMainGetFunc(doDeviceSpecificGet)
 	framework.RegisterMainSetFunc(doDeviceSpecificSet)
 }
@@ -33,6 +32,8 @@ func doDeviceSpecificSet(socketKey string, setting string, arg1 string, arg2 str
 	switch setting {
 	case "state":
 		return setState(socketKey, arg1, arg2) // arg1 = outlet number, outlet range ex:("1-6") or "all". arg2 = state
+	case "rebootoutlet":
+		return rebootOutlet(socketKey, arg1, arg2) // arg1 = outlet number, arg2 = sleep duration
 	}
 
 	// If we get here, we didn't recognize the setting.  Send an error back to the config writer who had a bad URL.

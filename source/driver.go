@@ -3,7 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/mefranklin6/microservice-framework/framework"
 )
@@ -59,7 +61,7 @@ func getAllOutlets(socketKey string) (string, error) {
 
 // Sets the state of one or more outlets
 // num can be a single outlet number, a range of outlets (ex: "1-6"), or "all"
-// state can be "on", "off", or "reboot"
+// state can be "on", "off", or "reboot".  "reboot" uses the reboot time set on the device
 func setState(socketKey string, num string, state string) (string, error) {
 	function := "setState"
 
@@ -70,11 +72,33 @@ func setState(socketKey string, num string, state string) (string, error) {
 
 	resp, err := sendCommand(socketKey, cmd)
 	if err != nil {
-		errMsg := function + " - error setting outlet state: " + err.Error()
+		errMsg := function + " - error setting outlet(s) state: " + err.Error()
 		framework.AddToErrors(socketKey, errMsg)
 		return "", err
 	}
 	return resp, nil
+}
+
+// Reboots outlet or outlet range with a custom sleep duration
+// Note: if you want to use the reboot times set on the the device, use setState instead
+func rebootOutlet(socketKey string, num string, sleep string) (string, error) {
+	function := "rebootOutlet"
+
+	framework.Log(function + " Rebooting outlet(s): " + num + " for (seconds): " + sleep)
+
+	sleep = strings.TrimSpace(sleep)
+	sleep = strings.Trim(sleep, `"'`)
+
+	intSleep, err := strconv.Atoi(sleep)
+	if err != nil {
+		errMsg := function + " - " + sleep + " is not a valid sleep time"
+		framework.AddToErrors(socketKey, errMsg)
+		return "", errors.New(errMsg)
+	}
+
+	setState(socketKey, num, "off")
+	time.Sleep(time.Duration(intSleep) * time.Second)
+	return setState(socketKey, num, "on")
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,12 +120,6 @@ func telnetLoginNegotiation(socketKey string) bool {
 			username = strings.Split(credentials, ":")[0]
 			password = strings.Split(credentials, ":")[1]
 		}
-	}
-
-	if password == "" {
-		noPwMsg := function + " - Password is required"
-		framework.AddToErrors(socketKey, noPwMsg)
-		return false
 	}
 
 	userSent := false
@@ -159,7 +177,7 @@ func ensureConnected(socketKey string) bool {
 
 	connected := framework.CheckConnectionsMapExists(socketKey)
 	if !connected {
-		framework.Log(function + " - No existing connection found. Creating new connection.")
+		framework.Log(function + " - No existing connection found. Creating new " + protocol + " connection to: " + socketKey)
 		negotiation := telnetLoginNegotiation(socketKey)
 		if !negotiation {
 			framework.Log(function + " - Telnet login negotiation failed.")
@@ -186,7 +204,7 @@ func sendCommand(socketKey string, command string) (string, error) {
 
 	// Make a read loop. APC's are really chatty and can have long multi-line responses
 	// alloutlets returns one line per outlet, so we need a lot of reads for larger PDU's.
-	const maxReads = 40
+	const maxReads = 80
 	for i := 0; i < maxReads; i++ {
 		// Remove any null bytes, carriage returns, or line feeds (there's a lot)
 		line := framework.ReadLineFromSocket(socketKey)
