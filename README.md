@@ -2,33 +2,33 @@
 
 [OpenAV](https://github.com/Dartmouth-OpenAV) compatible microservice for controlling APC Switched Power Distribution Units (PDU's)
 
+Originally written by [Matthew Franklin](https://github.com/mefranklin6) (mefranklin6) at Chico State in October of 2025.
+
 ## Overview
 
 This microservice should work with all current APC switched PDU's.
 
-Developed with and tested against "NetShelter" models 7900B's and APDU9941's.
+Developed with and tested with "NetShelter" models 7900B's and APDU9941's.
 
 ## Device Configuration
 
 APC devices come with SSH and DHCP enabled out of the box.  For now, this microservice only supports Telnet.
 
-*Login over SSH to the device then:*
+1. **Use a workstation to connect to the device over SSH or serial port.**  If this is a new device, you'll be asked to change the password on first login.  Default user is `apc`, default password is `apc`.  
 
-If this is a new device, you'll be asked to change the password on first login.  Default user is `apc`, default password is `apc`.  
+2. Follow the steps to change the password if prompted, then **run these commands:**
 
-Follow the steps to change the password if prompted, then run these commands:
+    - `console -t enable`
+    - `reboot`
+    - `YES`
 
-- `console -t enable`
-- `reboot`
-- `YES`
-
-### Microservice setup and use
+## Microservice setup and use
 
 By default, this microservice presumes the protocol is defined in the URL.  This is because these devices can support both Telnet and SSH. This setup allows the flexibility to use either protocol within the same container.
 
 ex: `http://<microserviceAddr>/telnet|<user>:<pw>@<deviceAddr>:<devicePort>`
 
-To enable 'legacy' telnet-only mode: add `framework.UseTelnet = true` to to 'setFrameworkGlobals' in microservice.go.
+To enable 'legacy' Telnet-only or SSH-only mode: add `framework.UseTelnet = true` or ``framework.UseSSH = true`` to to 'setFrameworkGlobals' in microservice.go.
 
 ## Endpoints
 
@@ -48,8 +48,10 @@ Returns "ok".  Check logs for errors.
 
 ### Get all outlets
 
+GET `/state/alloutlets`
+
 Returns all outlets delimited by pipes `|`
 
 ## Note to maintainers
 
-This microservice requires built-in echo handling, at least for telnet.  At the time of development, the devices tested did not seem to care that we sent "DON'T ECHO" at the IAC stage; Even though they reply "WON'T ECHO", they still send echo.  It was deemed more reliable to just ignore all IAC and process reads with IAC default values.
+This microservice requires built-in echo handling, at least for Telnet.  At the time of development, the devices tested did not seem to care that we sent "DON'T ECHO" at the IAC stage; Even though they reply "WON'T ECHO", they still send echo.  It was deemed more reliable to just ignore all IAC negotiation and process reads with IAC default values.
